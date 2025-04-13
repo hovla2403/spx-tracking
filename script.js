@@ -11,33 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loader = document.getElementById('loader');
     const errorMessage = document.getElementById('error-message');
 
-    function tryFocusInput() {
-        console.log('Attempting to focus input'); // Debug log
-        trackingNumberInput.focus();
-
-        // Kiểm tra nếu là thiết bị di động
-        if (/Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
-            console.log('Detected mobile device'); // Debug log
-            setTimeout(() => {
-                try {
-                    trackingNumberInput.focus();
-                    console.log('Input focused on mobile'); // Debug log
-
-                    // Đặt lại thuộc tính để kích thích bàn phím
-                    trackingNumberInput.setAttribute('type', 'text');
-                    trackingNumberInput.blur();
-                    trackingNumberInput.focus();
-
-                    // Cuộn đến input
-                    trackingNumberInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } catch (err) {
-                    console.error('Error focusing input:', err); // Debug log
-                }
-            }, 500); // Timeout 500ms để đảm bảo timing
-        }
-    }
-    // Tự động focus vào input khi load trang
-    // trackingNumberInput.focus();
+    
     
     // Kiểm tra tham số URL khi tải trang
     const urlParams = new URLSearchParams(window.location.search);
@@ -46,8 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         trackingNumberInput.value = initialTrackingNumber;
         clearInput.style.display = 'block';
         searchTracking();
-    }else{
-        tryFocusInput();
     }
 
     // Hiển thị/ẩn nút xóa khi có nội dung
@@ -118,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     clearInput.style.display = 'block'; // Hiển thị nút xóa
                     errorMessage.style.display = 'none'; // Ẩn thông báo lỗi nếu có
                     trackingContainer.style.display = 'none'; // Ẩn container kết quả
-                    trackingNumberInput.focus(); // Focus lại vào input sau khi dán
+                    // trackingNumberInput.focus(); // Focus lại vào input sau khi dán
                     searchTracking();
                 } else {
                     showError('Clipboard trống. Vui lòng sao chép nội dung trước.');
@@ -130,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Clipboard read error:', err);
     
                 // Thử mở hộp thoại dán thủ công trên Safari
-                trackingNumberInput.focus();
                 trackingNumberInput.select();
                 try {
                     document.execCommand('paste'); // Phương thức dự phòng cho Safari
