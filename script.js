@@ -180,6 +180,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (latestRecord.milestone_code === 10) {
             statusClass = 'status-returned';
             statusText = 'Đơn hàng đã bị hoàn';
+        }else if (latestRecord.milestone_code === 1) {
+            statusClass = 'status-pickup-failed';
+            statusText = 'Shipper lấy hàng không thành công ';
         } else {
             statusText = 'Đang vận chuyển';
         }
@@ -196,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         records.forEach(record => {
-            if (record.display_flag === 1) {
+            if (record.display_flag === 1 || record.display_flag  === 0) {
                 const trackingItem = document.createElement('div');
                 trackingItem.className = 'tracking-item';
                 
