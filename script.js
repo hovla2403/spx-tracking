@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (latestRecord.milestone_code === 10) {
             statusClass = 'status-returned';
             statusText = 'Đơn hàng đã bị hoàn';
-        }else if (latestRecord.milestone_code === 1) {
+        }else if (latestRecord.milestone_code === 1 && latestRecord.tracking_code === "F001") {
             statusClass = 'status-pickup-failed';
             statusText = 'Shipper lấy hàng không thành công ';
         } else {
