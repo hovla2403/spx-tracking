@@ -250,4 +250,104 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.color = '#dc3545';
         errorMessage.style.display = 'block';
     }
+    
+    document.getElementById('find-number-search').addEventListener('click', async () => {
+        const carrier = document.getElementById('carrier').value;
+        const prefix = document.getElementById('prefix').value;
+        const phoneNumber = document.getElementById('phone-number').value;
+        const resultDiv = document.getElementById('find-number-result');
+        const loader = document.getElementById('find-number-loader');
+
+        // Validation: only carrier is required
+        if (!carrier) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Vui lòng chọn nhà mạng.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        // Validate numeric input if fields are not empty
+        if (prefix && !/^\d+$/.test(prefix)) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Đầu số chỉ được chứa số.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+        if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Số điện thoại chỉ được chứa số.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        // Show loader
+        loader.style.display = 'block';
+        resultDiv.style.display = 'none';
+
+        try {
+            // Replace with your actual API endpoint
+            const response = await fetch('/api/find-number', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ carrier, prefix, phoneNumber }),
+            });
+
+            const data = await response.json();
+
+            // Hide loader
+            loader.style.display = 'none';
+
+            if (data.success) {
+                resultDiv.className = 'alert alert-success';
+                resultDiv.innerHTML = `
+                    Phone: <span id="phone-number-result">${data.data.phone}</span>
+                    <button class="btn btn-primary btn-sm copy-button" id="copy-phone-button">Copy</button>
+                `;
+                resultDiv.style.display = 'block';
+
+                // Add event listener for copy button
+                document.getElementById('copy-phone-button').addEventListener('click', () => {
+                    const phoneNumber = document.getElementById('phone-number-result').textContent;
+                    navigator.clipboard.writeText(phoneNumber)
+                        .then(() => {
+                            // Provide feedback (e.g., change button text temporarily)
+                            const button = document.getElementById('copy-phone-button');
+                            button.textContent = 'Đã copy!';
+                            setTimeout(() => {
+                                button.textContent = 'Copy';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy:', err);
+                            resultDiv.className = 'alert alert-danger';
+                            resultDiv.textContent = 'Không thể sao chép số điện thoại.';
+                            resultDiv.style.display = 'block';
+                        });
+                });
+            } else {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.textContent = data.message || 'Tìm kiếm thất bại.';
+                resultDiv.style.display = 'block';
+            }
+        } catch (error) {
+            // Hide loader
+            loader.style.display = 'none';
+
+            // Display error
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+            resultDiv.style.display = 'block';
+        }
+    });
+
+    // Clear result when modal is closed
+    document.getElementById('findNumberModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('carrier').value = 'VNMB';
+        document.getElementById('prefix').value = '';
+        document.getElementById('phone-number').value = '';
+        document.getElementById('find-number-result').style.display = 'none';
+        document.getElementById('find-number-loader').style.display = 'none';
+    });
 });
