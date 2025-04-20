@@ -33,6 +33,7 @@ app.post('/api/find-number', async (req, res) => {
   const { carrier, prefix, phoneNumber } = req.body;
 
   const tryFindNumber = async () => {
+    let phoneData = null;
     try {
       // Construct the chaycodeso3.com API URL based on input
       let chaycodesoUrl = 'https://chaycodeso3.com/api?act=number&apik=480ff3b0a20e990c&appId=1002';
@@ -45,7 +46,7 @@ app.post('/api/find-number', async (req, res) => {
       }
       // Call chaycodeso3.com API to get phone number
       const chaycodesoResponse = await axios.get(chaycodesoUrl);
-      let phoneData = chaycodesoResponse.data;
+      phoneData = chaycodesoResponse.data;
 
       // Check if phone number was returned
       if (!phoneData || !phoneData.Result) {
