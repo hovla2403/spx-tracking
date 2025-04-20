@@ -125,6 +125,8 @@ app.post('/api/find-number', async (req, res) => {
       }
     } catch (error) {
       console.error('Error processing request:', error.message);
+      let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
+      await axios.get(chaycodesoexpired);
       return res.status(500).json({
         success: false,
         message: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
