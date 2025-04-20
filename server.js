@@ -45,7 +45,7 @@ app.post('/api/find-number', async (req, res) => {
       }
       // Call chaycodeso3.com API to get phone number
       const chaycodesoResponse = await axios.get(chaycodesoUrl);
-      const phoneData = chaycodesoResponse.data;
+      let phoneData = chaycodesoResponse.data;
 
       // Check if phone number was returned
       if (!phoneData || !phoneData.Result) {
