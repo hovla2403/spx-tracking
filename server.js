@@ -104,7 +104,15 @@ app.post('/api/find-number', async (req, res) => {
         await axios.get(chaycodesoexpired);
 
         // Retry the process by calling tryFindNumber again
-        return await tryFindNumber();
+        if(!phoneNumber){
+          return await tryFindNumber();
+        }else{
+          return res.status(500).json({
+            success: false,
+            message: 'Phone exist!',
+            error: error.message,
+          });
+        }
       } else {
         // If the phone number does not exist, return success
         return res.status(200).json({
