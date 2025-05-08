@@ -36,18 +36,18 @@ app.post('/api/find-number', async (req, res) => {
     let phoneData = null;
     try {
       // Construct the chaycodeso3.com API URL based on input
-      let chaycodesoUrl = 'https://chaycodeso3.com/api?act=number&apik=480ff3b0a20e990c&appId=1002';
+      // let chaycodesoUrl = 'https://chaycodeso3.com/api?act=number&apik=480ff3b0a20e990c&appId=1002';
+      let chaycodesoUrl = 'https://funotp.com/api?action=number&service=shopee&apikey=8nbxrfxsd3houqekucrac1796pj4ak5w';
       if (prefix) {
-        chaycodesoUrl += `&carrier=${carrier}&prefix=${prefix}`;
+        chaycodesoUrl += `&operator=${carrier}&prefix=${prefix}`;
       } else if (phoneNumber) {
-        chaycodesoUrl += `&carrier=${carrier}&number=${phoneNumber}`;
+        chaycodesoUrl += `&operator=${carrier}&number=${phoneNumber}`;
       } else {
-        chaycodesoUrl += `&carrier=${carrier}`;
+        chaycodesoUrl += `&operator=${carrier}`;
       }
       // Call chaycodeso3.com API to get phone number
       const chaycodesoResponse = await axios.get(chaycodesoUrl);
       phoneData = chaycodesoResponse.data;
-
       // Check if phone number was returned
       if (!phoneData || !phoneData.Result) {
         return res.status(400).json({
@@ -92,7 +92,7 @@ app.post('/api/find-number', async (req, res) => {
 
       // Prepare Shopee API payload with phone number from chaycodeso3
       const shopeePayload = {
-        phone: `84${phoneData.Result.Number}`,
+        phone: `${phoneData.Result.number}`,
         scenario: 3,
       };
 
@@ -101,8 +101,8 @@ app.post('/api/find-number', async (req, res) => {
       // Check if the phone number exists in Shopee
       if (shopeeResponse.data.data.exist === true) {
         // Mark the phone number as expired in chaycodeso3
-        let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-        await axios.get(chaycodesoexpired);
+        // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
+        // await axios.get(chaycodesoexpired);
 
         // Retry the process by calling tryFindNumber again
         if(!phoneNumber){
@@ -120,14 +120,14 @@ app.post('/api/find-number', async (req, res) => {
           success: true,
           message: 'Tìm kiếm thành công!',
           data: {
-            phone: phoneData.Result.Number,
+            phone: phoneData.Result.number,
           },
         });
       }
     } catch (error) {
       console.error('Error processing request:', error.message);
-      let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-      await axios.get(chaycodesoexpired);
+      // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
+      // await axios.get(chaycodesoexpired);
       return res.status(500).json({
         success: false,
         message: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
