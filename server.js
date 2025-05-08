@@ -102,7 +102,9 @@ app.post('/api/find-number', async (req, res) => {
       if (shopeeResponse.data.data.exist === true) {
         // Mark the phone number as expired in chaycodeso3
         // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-        // await axios.get(chaycodesoexpired);
+        let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
+        
+        await axios.get(chaycodesoexpired);
 
         // Retry the process by calling tryFindNumber again
         if(!phoneNumber){
@@ -127,7 +129,8 @@ app.post('/api/find-number', async (req, res) => {
     } catch (error) {
       console.error('Error processing request:', error.message);
       // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-      // await axios.get(chaycodesoexpired);
+      let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
+      await axios.get(chaycodesoexpired);
       return res.status(500).json({
         success: false,
         message: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
