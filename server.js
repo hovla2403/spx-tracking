@@ -37,24 +37,24 @@ app.post('/api/find-number', async (req, res) => {
     try {
       // Construct the chaycodeso3.com API URL based on input
       // let chaycodesoUrl = 'https://chaycodeso3.com/api?act=number&apik=480ff3b0a20e990c&appId=1002';
-      let chaycodesoUrl = 'https://funotp.com/api?action=number&service=shopee&apikey=8nbxrfxsd3houqekucrac1796pj4ak5w';
-      if (prefix) {
-        chaycodesoUrl += `&operator=${carrier}&prefix=${prefix}`;
-      } else if (phoneNumber) {
-        chaycodesoUrl += `&operator=${carrier}&number=${phoneNumber}`;
-      } else {
-        chaycodesoUrl += `&operator=${carrier}`;
-      }
+      // let chaycodesoUrl = 'https://funotp.com/api?action=number&service=shopee&apikey=8nbxrfxsd3houqekucrac1796pj4ak5w';
+      // if (prefix) {
+      //   chaycodesoUrl += `&operator=${carrier}&prefix=${prefix}`;
+      // } else if (phoneNumber) {
+      //   chaycodesoUrl += `&operator=${carrier}&number=${phoneNumber}`;
+      // } else {
+      //   chaycodesoUrl += `&operator=${carrier}`;
+      // }
       // Call chaycodeso3.com API to get phone number
-      const chaycodesoResponse = await axios.get(chaycodesoUrl);
-      phoneData = chaycodesoResponse.data;
+      // const chaycodesoResponse = await axios.get(chaycodesoUrl);
+      // phoneData = chaycodesoResponse.data;
       // Check if phone number was returned
-      if (!phoneData || !phoneData.Result) {
-        return res.status(400).json({
-          success: false,
-          message: 'Không tìm thấy số điện thoại từ API chaycodeso3.',
-        });
-      }
+      // if (!phoneData || !phoneData.Result) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: 'Không tìm thấy số điện thoại từ API chaycodeso3.',
+      //   });
+      // }
 
       // Shopee API configuration
       const shopeeUrl = 'https://mall.shopee.vn/api/v4/account/basic/check_account_exist';
@@ -92,45 +92,50 @@ app.post('/api/find-number', async (req, res) => {
 
       // Prepare Shopee API payload with phone number from chaycodeso3
       const shopeePayload = {
-        phone: `${phoneData.Result.number}`,
+        // phone: `${phoneData.Result.number}`,
+        phone: `84${phoneNumber}`,
         scenario: 3,
       };
-
       // Call Shopee API
       const shopeeResponse = await axios.post(shopeeUrl, shopeePayload, { headers });
       // Check if the phone number exists in Shopee
       if (shopeeResponse.data.data.exist === true) {
+        return res.status(200).json({
+          success: false,
+          message: 'Phone exist!'
+         
+        });
         // Mark the phone number as expired in chaycodeso3
         // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-        let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
+        // let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
         
-        await axios.get(chaycodesoexpired);
+        // await axios.get(chaycodesoexpired);
 
         // Retry the process by calling tryFindNumber again
-        if(!phoneNumber){
-          return await tryFindNumber();
-        }else{
-          return res.status(500).json({
-            success: false,
-            message: 'Phone exist!',
-            error: error.message,
-          });
-        }
+        // if(!phoneNumber){
+        //   return await tryFindNumber();
+        // }else{
+        //   return res.status(500).json({
+        //     success: false,
+        //     message: 'Phone exist!',
+        //     error: error.message,
+        //   });
+        // }
       } else {
         // If the phone number does not exist, return success
         return res.status(200).json({
           success: true,
           message: 'Tìm kiếm thành công!',
           data: {
-            phone: phoneData.Result.number,
+            phone: phoneNumber,
           },
         });
       }
     } catch (error) {
       console.error('Error processing request:', error.message);
       // let chaycodesoexpired = `https://chaycodeso3.com/api?act=expired&apik=480ff3b0a20e990c&id=${phoneData.Result.Id}`;
-      let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
-      await axios.get(chaycodesoexpired);
+      // let chaycodesoexpired = `https://app.myclientsoft.cc/api?apikey=8nbxrfxsd3houqekucrac1796pj4ak5w&action=cancel-service&id=${phoneData.Result.id}`;
+      // await axios.get(chaycodesoexpired);
       return res.status(500).json({
         success: false,
         message: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
@@ -142,7 +147,6 @@ app.post('/api/find-number', async (req, res) => {
   // Start the process
   await tryFindNumber();
 });
-
 // Serve the main HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
