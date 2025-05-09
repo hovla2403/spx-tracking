@@ -268,27 +268,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     document.getElementById('find-number-search').addEventListener('click', async () => {
-        // const carrier = document.getElementById('carrier').value;
-        // const prefix = document.getElementById('prefix').value;
+        const carrier = document.getElementById('carrier').value;
+        const prefix = document.getElementById('prefix').value;
         const phoneNumber = document.getElementById('phone-number').value;
         const resultDiv = document.getElementById('find-number-result');
         const loader = document.getElementById('find-number-loader');
 
         // Validation: only carrier is required
-        // if (!carrier) {
-        //     resultDiv.className = 'alert alert-danger';
-        //     resultDiv.textContent = 'Vui lòng chọn nhà mạng.';
-        //     resultDiv.style.display = 'block';
-        //     return;
-        // }
+        if (!carrier) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Vui lòng chọn nhà mạng.';
+            resultDiv.style.display = 'block';
+            return;
+        }
 
         // Validate numeric input if fields are not empty
-        // if (prefix && !/^\d+$/.test(prefix)) {
-        //     resultDiv.className = 'alert alert-danger';
-        //     resultDiv.textContent = 'Đầu số chỉ được chứa số.';
-        //     resultDiv.style.display = 'block';
-        //     return;
-        // }
+        if (prefix && !/^\d+$/.test(prefix)) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Đầu số chỉ được chứa số.';
+            resultDiv.style.display = 'block';
+            return;
+        }
         if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
             resultDiv.className = 'alert alert-danger';
             resultDiv.textContent = 'Số điện thoại chỉ được chứa số.';
