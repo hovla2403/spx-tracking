@@ -274,6 +274,49 @@
         .copy-button:hover {
             background-color: #0056b3;
         }
+        .dropdown-menu {
+            min-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dropdown-item {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+        .modal-footer .btn {
+            margin-left: 5px; /* Add spacing between buttons */
+        }
+        .alert ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.alert ul li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.alert ul li .copy-button {
+    margin-left: auto;
+}
+
+.text-danger {
+    color: #dc3545;
+}
+
+.text-success {
+    color: #28a745;
+}
+
+.text-muted {
+    color: #6c757d;
+}
     </style>
 </head>
 <body>
@@ -290,7 +333,13 @@
                     <button class="btn btn-info" type="button" id="paste-button">Dán</button>
                     <button class="btn btn-primary" type="button" id="search-button">Tìm kiếm</button>
                     <button class="btn btn-secondary" type="button" id="copy-url-button">Copy URL</button>
-                    <button class="btn btn-success" type="button" id="find-number-button" data-bs-toggle="modal" data-bs-target="#findNumberModal">Tìm số</button>
+                    <div class="dropdown position-relative">
+                        <button class="btn btn-success" type="button" id="find-number-button">Tìm số</button>
+                        <div class="dropdown-menu" id="find-options" style="display: none;">
+                            <a class="dropdown-item" href="#" id="option1">Tự động</a>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalOption2">1 or nhiều</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="error-message" class="error-message">Vui lòng nhập mã vận đơn hợp lệ.</div>
@@ -341,6 +390,31 @@
             </div>
         </div>
     </div>
+    <!-- Modal for Option 2 -->
+<div class="modal fade" id="modalOption2" tabindex="-1" aria-labelledby="modalOption2Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalOption2Label">Tìm số điện thoại</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="phone-number-only" class="form-label">Số điện thoại</label>
+                    <textarea class="form-control" id="phone-number-only" rows="4" placeholder="VD: 123456789 OR 77671191777670041477670066177670080777671366977671369077654775777671122777671485377671412683265713591265624583388156677671334377671" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"></textarea>
+                </div>
+                <div id="find-number-result-only" class="alert" style="display: none;"></div>
+                <div id="find-number-loader-only" class="loader" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-info" id="paste-phone-button">Dán</button>
+                <button type="button" class="btn btn-danger" id="clear-phone-button">Xóa</button>
+                <button type="button" class="btn btn-primary" id="find-number-search-only">Tìm kiếm</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/script.js"></script>
 </body>
