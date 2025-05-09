@@ -307,8 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({  phoneNumber }),
-                // body: JSON.stringify({ carrier, prefix, phoneNumber }),
+                body: JSON.stringify({ carrier, prefix, phoneNumber }),
             });
 
             const data = await response.json();
