@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
         findOptions.style.display = 'none'; // Hide dropdown
         const findNumberModal = new bootstrap.Modal(document.getElementById('findNumberModal'));
         findNumberModal.show();
+        document.getElementById('find-number-search').click();
     });
 
     function searchTracking() {
