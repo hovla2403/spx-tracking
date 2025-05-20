@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
+const { shopeeUrl, headers } = require('./shopeeConfig');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,40 +56,6 @@ app.post('/api/find-number', async (req, res) => {
                               message: 'Không tìm thấy số điện thoại từ API chaycodeso3.',
                         });
                   }
-
-                  // Shopee API configuration
-                  const shopeeUrl = 'https://mall.shopee.vn/api/v4/account/basic/check_account_exist';
-                  const headers = {
-                        'Content-Type': 'application/json; charset=UTF-8',
-                        'Shopee-Http-Dns-Mode': '1',
-                        'X-Shopee-Client-Timezone': 'Asia/Ho_Chi_Minh',
-                        'Cache-Control': 'no-cache, no-store',
-                        'Client-Request-Id': '92710500-0410-40cb-baa5-ca1c1e01a4ba.249',
-                        'X-Csrftoken': 'mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05',
-                        'User-Agent': 'okhttp/3.12.4 app_type=1 platform=native_android os_ver=30 appver=34426 Cronet/102.0.5005.61',
-                        'Cookie': (
-                              'userid=0; shopid=0; username=null; shopee_token=null; ' +
-                              'UA=Shopee%20Android%20Beeshop%20locale%2Fvi%20version%3D34426%20appver%3D34426; ' +
-                              'language=vi; shopee_app_version=34426; SPC_CLIENTID=A3Wh8X17yosAdY5jwamvchpsoyviupxi; ' +
-                              'SPC_DID=A3Wh8X17yosAdY5jaZIZZWOBQervhwz1UDU0e7FWKL4=; SPC_F=8e2ab92ab96043b8_unknown; ' +
-                              'SPC_AFTID=bcce123d-8709-46e5-b9c5-ba406a4d7fd2; SPC_U=-; SPC_EC=-; ' +
-                              'SPC_SI=sa8AaAAAAABvSW9OZlRINjOBCQAAAAAAYzh4bE5Pamg=; ' +
-                              'SPC_SEC_SI=v1-NXhCMGpaajA4VURwM3lvY2LGvWx0CRhNGnC+WYuGXl4iViXQwlSS3ejx7ZA2lXR···l85IwA1YGF75rLzhT6xMlcapOSGgAw3TePWq6F4pJxJ0=; ' +
-                              'SPC_R_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; ' +
-                              'REC_T_ID=58236bbe-1c74-11f0-91cd-0eeab2acd882; ' +
-                              'SPC_R_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-                              'SPC_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-                              'SPC_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; shopee_rn_version=1744974721; ' +
-                              'shopee_rn_bundle_version=6055005; SPC_RNBV=6055005; ' +
-                              'chat-access-token=016b15fc761d06ffd4d0a1a259722b4579584e5d7dceecb3339167c0689f4a2b9a; ' +
-                              'csrftoken=mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05; csrftoken=X2PM1dgf1mfUcI37qJp41glN0NilhQyC; ' +
-                              '_gcl_au=1.1.1231238568.1745051911; _fbp=fb.1.1745051921243.167395647233423831'
-                        ),
-                        'X-Sap-Ri': '736103685e968617e536761e01ef14c422169b0a7efb8f2f3e17',
-                        'Af-Ac-Enc-Sz-Token': 'ZEWApdJl/HU+0SHec0fVlA==|5SFO2B4cXZeVFaKSnWkkpUHvV0RGAV4OMmthxKbjI9ER3Xod3PzHfh8rzVjEqphoJ8D//ykiMjzJ9Bcx0JJ+pwvc2/1cN82T+c1Ztw==|cGC/S/99oMei/Q37|08|1',
-                        'Referer': 'https://mall.shopee.vn/',
-                        'Accept-Encoding': 'gzip, deflate, br',
-                  };
 
                   // Prepare Shopee API payload with phone number from chaycodeso3
                   const shopeePayload = {
@@ -178,39 +145,6 @@ app.post('/api/find-number-only', async (req, res) => {
   }
 
   // Shopee API configuration
-  const shopeeUrl = 'https://mall.shopee.vn/api/v4/account/basic/check_account_exist';
-  const headers = {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'Shopee-Http-Dns-Mode': '1',
-    'X-Shopee-Client-Timezone': 'Asia/Ho_Chi_Minh',
-        'Cache-Control': 'no-cache, no-store',
-        'Client-Request-Id': '92710500-0410-40cb-baa5-ca1c1e01a4ba.249',
-        'X-Csrftoken': 'mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05',
-        'User-Agent': 'okhttp/3.12.4 app_type=1 platform=native_android os_ver=30 appver=34426 Cronet/102.0.5005.61',
-        'Cookie': (
-          'userid=0; shopid=0; username=null; shopee_token=null; ' +
-          'UA=Shopee%20Android%20Beeshop%20locale%2Fvi%20version%3D34426%20appver%3D34426; ' +
-          'language=vi; shopee_app_version=34426; SPC_CLIENTID=A3Wh8X17yosAdY5jwamvchpsoyviupxi; ' +
-          'SPC_DID=A3Wh8X17yosAdY5jaZIZZWOBQervhwz1UDU0e7FWKL4=; SPC_F=8e2ab92ab96043b8_unknown; ' +
-          'SPC_AFTID=bcce123d-8709-46e5-b9c5-ba406a4d7fd2; SPC_U=-; SPC_EC=-; ' +
-          'SPC_SI=sa8AaAAAAABvSW9OZlRINjOBCQAAAAAAYzh4bE5Pamg=; ' +
-          'SPC_SEC_SI=v1-NXhCMGpaajA4VURwM3lvY2LGvWx0CRhNGnC+WYuGXl4iViXQwlSS3ejx7ZA2lXR···l85IwA1YGF75rLzhT6xMlcapOSGgAw3TePWq6F4pJxJ0=; ' +
-          'SPC_R_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; ' +
-          'REC_T_ID=58236bbe-1c74-11f0-91cd-0eeab2acd882; ' +
-          'SPC_R_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-          'SPC_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-          'SPC_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; shopee_rn_version=1744974721; ' +
-          'shopee_rn_bundle_version=6055005; SPC_RNBV=6055005; ' +
-          'chat-access-token=016b15fc761d06ffd4d0a1a259722b4579584e5d7dceecb3339167c0689f4a2b9a; ' +
-          'csrftoken=mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05; csrftoken=X2PM1dgf1mfUcI37qJp41glN0NilhQyC; ' +
-          '_gcl_au=1.1.1231238568.1745051911; _fbp=fb.1.1745051921243.167395647233423831'
-        ),
-        'X-Sap-Ri': '736103685e968617e536761e01ef14c422169b0a7efb8f2f3e17',
-        'Af-Ac-Enc-Sz-Token': 'ZEWApdJl/HU+0SHec0fVlA==|5SFO2B4cXZeVFaKSnWkkpUHvV0RGAV4OMmthxKbjI9ER3Xod3PzHfh8rzVjEqphoJ8D//ykiMjzJ9Bcx0JJ+pwvc2/1cN82T+c1Ztw==|cGC/S/99oMei/Q37|08|1',
-        'Referer': 'https://mall.shopee.vn/',
-        'Accept-Encoding': 'gzip, deflate, br',
-  };
-
   
   const results = [];
   // Check each 9-digit number
@@ -286,40 +220,6 @@ app.post('/api/find-number-only', async (req, res) => {
     });
   }
 
-  // Shopee API configuration
-  const shopeeUrl = 'https://mall.shopee.vn/api/v4/account/basic/check_account_exist';
-  const headers = {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'Shopee-Http-Dns-Mode': '1',
-    'X-Shopee-Client-Timezone': 'Asia/Ho_Chi_Minh',
-        'Cache-Control': 'no-cache, no-store',
-        'Client-Request-Id': '92710500-0410-40cb-baa5-ca1c1e01a4ba.249',
-        'X-Csrftoken': 'mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05',
-        'User-Agent': 'okhttp/3.12.4 app_type=1 platform=native_android os_ver=30 appver=34426 Cronet/102.0.5005.61',
-        'Cookie': (
-          'userid=0; shopid=0; username=null; shopee_token=null; ' +
-          'UA=Shopee%20Android%20Beeshop%20locale%2Fvi%20version%3D34426%20appver%3D34426; ' +
-          'language=vi; shopee_app_version=34426; SPC_CLIENTID=A3Wh8X17yosAdY5jwamvchpsoyviupxi; ' +
-          'SPC_DID=A3Wh8X17yosAdY5jaZIZZWOBQervhwz1UDU0e7FWKL4=; SPC_F=8e2ab92ab96043b8_unknown; ' +
-          'SPC_AFTID=bcce123d-8709-46e5-b9c5-ba406a4d7fd2; SPC_U=-; SPC_EC=-; ' +
-          'SPC_SI=sa8AaAAAAABvSW9OZlRINjOBCQAAAAAAYzh4bE5Pamg=; ' +
-          'SPC_SEC_SI=v1-NXhCMGpaajA4VURwM3lvY2LGvWx0CRhNGnC+WYuGXl4iViXQwlSS3ejx7ZA2lXR···l85IwA1YGF75rLzhT6xMlcapOSGgAw3TePWq6F4pJxJ0=; ' +
-          'SPC_R_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; ' +
-          'REC_T_ID=58236bbe-1c74-11f0-91cd-0eeab2acd882; ' +
-          'SPC_R_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-          'SPC_T_ID=l+jAOWUR+BQw7xbdsRtMGJStI8gZDnqBBkuR9HRGJBlQgC6OklbgOAi+pzKT1IUwRazEpUUIj1s75OyEz5qIW9q9pHRA4ikXr6ML3D4q4wxwqEqw9TaboPxRwT40qbUBr1VkVFe2sS6/aayOD921p3OIDYy+t0rSFlw23ovN4Ek=; ' +
-          'SPC_T_IV=b3NiMzYzdDVkOFZCWWsxMg==; shopee_rn_version=1744974721; ' +
-          'shopee_rn_bundle_version=6055005; SPC_RNBV=6055005; ' +
-          'chat-access-token=016b15fc761d06ffd4d0a1a259722b4579584e5d7dceecb3339167c0689f4a2b9a; ' +
-          'csrftoken=mBdO9J4eBuU2Jf1qx0i6oFqbJUXQyL05; csrftoken=X2PM1dgf1mfUcI37qJp41glN0NilhQyC; ' +
-          '_gcl_au=1.1.1231238568.1745051911; _fbp=fb.1.1745051921243.167395647233423831'
-        ),
-        'X-Sap-Ri': '736103685e968617e536761e01ef14c422169b0a7efb8f2f3e17',
-        'Af-Ac-Enc-Sz-Token': 'ZEWApdJl/HU+0SHec0fVlA==|5SFO2B4cXZeVFaKSnWkkpUHvV0RGAV4OMmthxKbjI9ER3Xod3PzHfh8rzVjEqphoJ8D//ykiMjzJ9Bcx0JJ+pwvc2/1cN82T+c1Ztw==|cGC/S/99oMei/Q37|08|1',
-        'Referer': 'https://mall.shopee.vn/',
-        'Accept-Encoding': 'gzip, deflate, br',
-  };
-
   const results = [];
   // Check each 9-digit number
   for (const number of numbersToCheck) {
@@ -365,6 +265,264 @@ app.post('/api/find-number-only', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
+// ===========================
+// 📦 LOWDB SETUP
+// ===========================
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+
+const adapter = new FileSync('db.json');
+const db = low(adapter);
+
+db.defaults({ orders: [] }).write();
+
+// ===========================
+// 🤖 TELEGRAM BOT
+// ===========================
+const config = require('./config.json'); // Tạo file config.json chứa telegram_token
+const TelegramBot = require('node-telegram-bot-api');
+const bot = new TelegramBot(config.telegram_token, { polling: true });
+
+// Nhận mã vận đơn từ Telegram
+bot.onText(/\/d (.+)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const input = match[1].trim();
+  const [id, ...noteParts] = input.split(' ');
+  const note = noteParts.join(' ').trim();
+
+  if (!/^SPXVN.+$/i.test(id)) {
+    return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
+  }
+
+  const exists = db.get('orders').find({ id, user_id: chatId }).value();
+  if (exists) {
+    return bot.sendMessage(chatId, `⚠️ Bạn đã theo dõi mã vận đơn này.`);
+  }
+
+  // Lấy trạng thái hiện tại của đơn
+  const info = await getLatestTrackingInfo(id);
+  const lastCode = info?.code;
+  const description = info?.description || 'Không có mô tả trạng thái';
+  const noteText = note ? `📝 ${note}\n` : '';
+
+  // ✅ Xử lý theo từng loại trạng thái:
+  if (lastCode === 'F980') {
+    return bot.sendMessage(chatId, `✅ Đơn hàng ${id} đã giao trước đó!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
+  }
+
+  if (lastCode === 'F585' || lastCode === 'F950') {
+    return bot.sendMessage(chatId, `❌ Đơn hàng ${id} đã bị hủy!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
+  }
+
+  if (lastCode === 'F001') {
+    bot.sendMessage(chatId, `⚠️ Đơn hàng ${id} chưa lấy được!\n${noteText}📄 ${description}\n⏳ Sẽ kiểm tra lại sau 24h.`);
+  }
+
+  if (lastCode === 'F600') {
+    bot.sendMessage(chatId, `🚚 Đơn hàng ${id} đang được giao:\n${noteText}📄 ${description}`);
+  }
+
+  // ✅ Thêm vào DB nếu không bị loại
+  db.get('orders')
+    .push({
+      id,
+      user_id: chatId,
+      note,
+      last_code: lastCode,
+      nextCheck: Date.now() + (
+        lastCode === 'F001' ? 24 * 60 * 60 * 1000 :
+        lastCode === 'F600' ? 5 * 60 * 1000 :
+        60 * 60 * 1000
+      )
+    })
+    .write();
+
+  bot.sendMessage(chatId, `✅ Đã thêm mã vận đơn: ${id} vào danh sách theo dõi.`);
+});
+
+bot.onText(/\/l/, (msg) => {
+  const chatId = msg.chat.id;
+
+  const orders = db.get('orders')
+    .filter({ user_id: chatId })
+    .value();
+
+  if (orders.length === 0) {
+    return bot.sendMessage(chatId, '📭 Bạn chưa theo dõi mã vận đơn nào.');
+  }
+
+  const list = orders.map((o, i) => 
+    `${i + 1}. ${o.id}${o.note ? ` 📝 ${o.note}` : ''}`
+  ).join('\n');
+
+  bot.sendMessage(chatId, `📋 Danh sách mã bạn đang theo dõi:\n\n${list}`);
+});
+
+bot.onText(/\/x (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const idToDelete = match[1].trim();
+
+  const exists = db.get('orders')
+    .find({ id: idToDelete, user_id: chatId })
+    .value();
+
+  if (!exists) {
+    return bot.sendMessage(chatId, `⚠️ Không tìm thấy mã ${idToDelete} trong danh sách của bạn.`);
+  }
+
+  db.get('orders')
+    .remove({ id: idToDelete, user_id: chatId })
+    .write();
+
+  bot.sendMessage(chatId, `🗑️ Đã xóa mã vận đơn ${idToDelete} khỏi danh sách theo dõi.`);
+});
+
+
+// Lệnh /start
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+
+  const welcomeMsg = `
+👋 Xin chào ${msg.from.first_name || 'bạn'}!
+
+🤖 Tôi là bot theo dõi đơn hàng giao vận.
+
+Bạn có thể chọn một hành động dưới đây 👇 hoặc dùng lệnh thủ công:
+- /d SPXVNxxxxx Ghi chú
+- /l
+- /x SPXVNxxxxx
+  `;
+
+  // bot.sendMessage(chatId, welcomeMsg, {
+  //   reply_markup: {
+  //     keyboard: [
+  //       ['➕ Thêm mã đơn hàng'],
+  //       ['📋 Danh sách mã đang theo dõi'],
+  //       ['🗑️ Xóa mã đơn hàng']
+  //     ],
+  //     resize_keyboard: true,
+  //     one_time_keyboard: false
+  //   }
+  // });
+});
+// 📦 Hàm lấy trạng thái đơn
+async function getLatestTrackingInfo(orderId) {
+  try {
+    const res = await axios.get(`https://spx-tracking.onrender.com/api/tracking?spx_tn=${orderId}`);
+    const records = res.data?.data?.sls_tracking_info?.records;
+    if (!records || !records.length) return null;
+
+    const latest = records.sort((a, b) => b.actual_time - a.actual_time)[0];
+    return {
+      code: latest.tracking_code,
+      description: latest.description,
+      timestamp: latest.actual_time
+    };
+  } catch (e) {
+    console.error(`❌ Lỗi API đơn ${orderId}:`, e.message);
+    return null;
+  }
+}
+// ✅ Kiểm tra đơn
+async function checkOrder(order) {
+  const info = await getLatestTrackingInfo(order.id);
+  if (!info) return null;
+
+  const { code, description } = info;
+  const noteText = order.note ? `📝 ${order.note}\n` : '';
+
+  const userId = order.user_id;
+
+  switch (code) {
+    case 'F980':
+      bot.sendMessage(userId, `✅ Đơn hàng ${order.id} đã giao thành công!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
+      db.get('orders').remove({ id: order.id, user_id: userId }).write();
+      break;
+
+    case 'F585':
+    case 'F950':
+      bot.sendMessage(userId, `❌ Đơn hàng ${order.id} đã bị hủy!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
+      db.get('orders').remove({ id: order.id, user_id: userId }).write();
+      break;
+
+    case 'F001':
+      // Thông báo nếu chưa báo hoặc có thay đổi
+      if (order.last_code !== 'F001') {
+        bot.sendMessage(userId, `⚠️ Không lấy được hàng cho đơn ${order.id}!\n${noteText}📄 ${description}`);
+      }
+      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F001' }).write();
+      return 24 * 60 * 60 * 1000; // 24 giờ
+
+
+    case 'F600':
+      // Chỉ thông báo nếu code thay đổi hoặc chưa từng thông báo
+      if (order.last_code !== 'F600') {
+        bot.sendMessage(userId, `🚚 Đơn hàng ${order.id} đang được giao:\n${noteText}📄 ${description}`);
+      }
+      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F600' }).write();
+      return 5 * 60 * 1000;
+
+    default:
+      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: code }).write();
+      return 60 * 60 * 1000;
+  }
+
+  return null;
+}
+
+// 🔁 Lập lịch kiểm tra
+function scheduleChecks() {
+  setInterval(async () => {
+    const now = Date.now();
+    const orders = db.get('orders').value();
+
+    for (const order of orders) {
+      if (order.nextCheck && order.nextCheck > now + 500) continue;
+
+      const delay = await checkOrder(order);
+      if (delay) {
+        db.get('orders').find({ id: order.id, user_id: order.user_id }).assign({ nextCheck: now + delay }).write();
+      }
+    }
+  }, 60 * 1000); // Kiểm tra mỗi phút
+}
+
+scheduleChecks();
+
+// ===========================
+// 🌐 API thêm đơn qua Web
+// ===========================
+app.post('/api/add-tracking', (req, res) => {
+  const { id, user_id, note = '' } = req.body;
+
+if (!/^SPXVN.+$/i.test(id)) {
+return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
+}
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'Thiếu user_id (Telegram chat_id)' });
+  }
+
+  const exists = db.get('orders')
+    .find({ id, user_id })
+    .value();
+
+  if (exists) {
+    return res.status(409).json({ error: '⚠️ Mã vận đơn đã tồn tại cho user này.' });
+  }
+
+   db.get('orders')
+    .push({ id, user_id, status: 'dang_giao', note })
+    .write();
+
+  res.json({
+    message: '✅ Đã thêm mã vận đơn thành công',
+    id,
+    user_id,
+    note
+  });
+});
+
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {
