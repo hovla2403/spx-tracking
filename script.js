@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     // Clear result when modal is closed
     document.getElementById('findNumberModal').addEventListener('hidden.bs.modal', () => {
-        document.getElementById('carrier').value = 'vietnamobile';
+        document.getElementById('carrier').value = 'mobifone';
         document.getElementById('prefix').value = '';
         document.getElementById('phone-number').value = '';
         document.getElementById('find-number-result').style.display = 'none';
