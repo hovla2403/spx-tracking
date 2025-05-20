@@ -366,19 +366,19 @@
                     <div class="mb-3">
                         <label for="carrier" class="form-label">Nhà mạng</label>
                         <select class="form-select" id="carrier">
+                            <option value="mobifone">Mobifone</option>
                             <option value="vietnamobile">Vietnamobile</option>
                             <option value="viettel">Viettel</option>
-                            <option value="mobifone">Mobifone</option>
                             <option value="vinaphone">Vinaphone</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="prefix" class="form-label">Đầu số</label>
-                        <input type="number" class="form-control" id="prefix" placeholder="VD: 098" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                        <input type="number" class="form-control" id="prefix"  pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
                     </div>
                     <div class="mb-3">
                         <label for="phone-number" class="form-label">Số điện thoại</label>
-                        <input type="number" class="form-control" id="phone-number" placeholder="VD: 123456789" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                        <input type="number" class="form-control" id="phone-number" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
                     </div>
                     <div id="find-number-result" class="alert"></div>
                     <div id="find-number-loader" class="loader"></div>
@@ -401,7 +401,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="phone-number-only" class="form-label">Số điện thoại</label>
-                    <textarea class="form-control" id="phone-number-only" rows="4" placeholder="VD: 123456789 OR 77671191777670041477670066177670080777671366977671369077654775777671122777671485377671412683265713591265624583388156677671334377671" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"></textarea>
+                    <textarea class="form-control" id="phone-number-only" rows="4" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"></textarea>
                 </div>
                 <div id="find-number-result-only" class="alert" style="display: none;"></div>
                 <div id="find-number-loader-only" class="loader" style="display: none;"></div>
