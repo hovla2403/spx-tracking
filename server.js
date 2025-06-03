@@ -13,23 +13,88 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // API proxy endpoint
+// app.get('/api/tracking', async (req, res) => {
+//   try {
+//     const trackingNumber = req.query.spx_tn;
+    
+//     if (!trackingNumber) {
+//       return res.status(400).json({ error: 'Tracking number is required' });
+//     }
+    
+//     const response = await axios.get(`https://spx.vn/shipment/order/open/order/get_order_info?spx_tn=${trackingNumber}&language_code=vi`);
+    
+//     return res.json(response.data);
+//   } catch (error) {
+//     console.error('Error fetching tracking data:', error);
+//     return res.status(500).json({ error: 'Failed to fetch tracking data' });
+//   }
+// });
 app.get('/api/tracking', async (req, res) => {
   try {
-    const trackingNumber = req.query.spx_tn;
-    
-    if (!trackingNumber) {
-      return res.status(400).json({ error: 'Tracking number is required' });
+    const trackingInput = req.query.spx_tn;
+
+    if (!trackingInput) {
+      return res.status(400).json({ error: 'Tracking number(s) is required' });
     }
-    
-    const response = await axios.get(`https://spx.vn/shipment/order/open/order/get_order_info?spx_tn=${trackingNumber}&language_code=vi`);
-    
-    return res.json(response.data);
+
+    // Xử lý input: chuỗi đơn hoặc danh sách (cách bởi dấu phẩy)
+    const trackingNumbers = Array.isArray(trackingInput)
+      ? trackingInput
+      : typeof trackingInput === 'string'
+        ? trackingInput.split(',').map(tn => tn.trim())
+        : [trackingInput];
+
+    if (trackingNumbers.length === 0) {
+      return res.status(400).json({ error: 'No valid tracking numbers provided' });
+    }
+    console.log(trackingNumbers)
+    // Gọi API cho từng mã vận đơn
+    const results = await Promise.all(
+      trackingNumbers.map(async (trackingNumber) => {
+        try {
+          const response = await axios.get(
+            `https://spx.vn/shipment/order/open/order/get_order_info?spx_tn=${trackingNumber}&language_code=vi`,
+            { timeout: 5000 }
+          );
+
+          // Trích xuất dữ liệu trạng thái mới nhất
+          const records = response.data?.data?.sls_tracking_info?.records || [];
+          let description = 'Không rõ trạng thái';
+          let tracking_code = '';
+
+          if (records.length > 0) {
+            const latest = records.reduce((a, b) => (a.actual_time > b.actual_time ? a : b));
+            tracking_code = latest.tracking_code
+            description = latest.buyer_description || latest.milestone_name || 'Không rõ trạng thái';
+          }
+
+          return {
+            tracking_code,
+            description
+          };
+        } catch (error) {
+          console.error(`Error fetching tracking data for ${trackingNumber}:`, error.message);
+          return {
+            tracking_code: tracking_code,
+            description: `Lỗi: ${error.message}`
+          };
+        }
+      })
+    );
+
+    // Trả về kết quả
+    return res.json({
+      results,
+      total: results.length,
+      successCount: results.filter(r => !r.description.startsWith('Lỗi:')).length,
+      errorCount: results.filter(r => r.description.startsWith('Lỗi:')).length
+    });
+
   } catch (error) {
-    console.error('Error fetching tracking data:', error);
-    return res.status(500).json({ error: 'Failed to fetch tracking data' });
+    console.error('Unexpected error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 app.post('/api/find-number', async (req, res) => {
  const { carrier, prefix, phoneNumber } = req.body;
 
@@ -268,261 +333,264 @@ app.get('/', (req, res) => {
 // ===========================
 // 📦 LOWDB SETUP
 // ===========================
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
+// const low = require('lowdb');
+// const FileSync = require('lowdb/adapters/FileSync');
 
-const adapter = new FileSync('db.json');
-const db = low(adapter);
+// const adapter = new FileSync('db.json');
+// const db = low(adapter);
 
-db.defaults({ orders: [] }).write();
+// db.defaults({ orders: [] }).write();
 
 // ===========================
 // 🤖 TELEGRAM BOT
 // ===========================
-const config = require('./config.json'); // Tạo file config.json chứa telegram_token
-const TelegramBot = require('node-telegram-bot-api');
-const bot = new TelegramBot(config.telegram_token, { polling: true });
+// const config = require('./config.json'); // Tạo file config.json chứa telegram_token
+// const TelegramBot = require('node-telegram-bot-api');
+// const bot = new TelegramBot(config.telegram_token, { polling: true });
 
 // Nhận mã vận đơn từ Telegram
-bot.onText(/\/d (.+)/, async (msg, match) => {
-  const chatId = msg.chat.id;
-  const input = match[1].trim();
-  const [id, ...noteParts] = input.split(' ');
-  const note = noteParts.join(' ').trim();
+// bot.onText(/\/d (.+)/, async (msg, match) => {
+//   const chatId = msg.chat.id;
+//   const input = match[1].trim();
+//   const [id, ...noteParts] = input.split(' ');
+//   const note = noteParts.join(' ').trim();
 
-  if (!/^SPXVN.+$/i.test(id)) {
-    return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
-  }
+//   if (!/^SPXVN.+$/i.test(id)) {
+//     return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
+//   }
 
-  const exists = db.get('orders').find({ id, user_id: chatId }).value();
-  if (exists) {
-    return bot.sendMessage(chatId, `⚠️ Bạn đã theo dõi mã vận đơn này.`);
-  }
+//   const exists = db.get('orders').find({ id, user_id: chatId }).value();
+//   if (exists) {
+//     return bot.sendMessage(chatId, `⚠️ Bạn đã theo dõi mã vận đơn này.`);
+//   }
 
-  // Lấy trạng thái hiện tại của đơn
-  const info = await getLatestTrackingInfo(id);
-  const lastCode = info?.code;
-  const description = info?.description || 'Không có mô tả trạng thái';
-  const noteText = note ? `📝 ${note}\n` : '';
+//   // Lấy trạng thái hiện tại của đơn
+//   const info = await getLatestTrackingInfo(id);
+//   const lastCode = info?.code;
+//   const description = info?.description || 'Không có mô tả trạng thái';
+//   const noteText = note ? `📝 ${note}\n` : '';
 
-  // ✅ Xử lý theo từng loại trạng thái:
-  if (lastCode === 'F980') {
-    return bot.sendMessage(chatId, `✅ Đơn hàng ${id} đã giao trước đó!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
-  }
+//   // ✅ Xử lý theo từng loại trạng thái:
+//   if (lastCode === 'F980') {
+//     return bot.sendMessage(chatId, `✅ Đơn hàng ${id} đã giao trước đó!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
+//   }
 
-  if (lastCode === 'F585' || lastCode === 'F950') {
-    return bot.sendMessage(chatId, `❌ Đơn hàng ${id} đã bị hủy!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
-  }
+//   if (lastCode === 'F585' || lastCode === 'F950') {
+//     return bot.sendMessage(chatId, `❌ Đơn hàng ${id} đã bị hủy!\n${noteText}📄 ${description}\n⏹️ Không cần theo dõi nữa.`);
+//   }
 
-  if (lastCode === 'F001') {
-    bot.sendMessage(chatId, `⚠️ Đơn hàng ${id} chưa lấy được!\n${noteText}📄 ${description}\n⏳ Sẽ kiểm tra lại sau 24h.`);
-  }
+//   if (lastCode === 'F001') {
+//     bot.sendMessage(chatId, `⚠️ Đơn hàng ${id} chưa lấy được!\n${noteText}📄 ${description}\n⏳ Sẽ kiểm tra lại sau 24h.`);
+//   }
 
-  if (lastCode === 'F600') {
-    bot.sendMessage(chatId, `🚚 Đơn hàng ${id} đang được giao:\n${noteText}📄 ${description}`);
-  }
+//   if (lastCode === 'F600') {
+//     bot.sendMessage(chatId, `🚚 Đơn hàng ${id} đang được giao:\n${noteText}📄 ${description}`);
+//   }
 
-  // ✅ Thêm vào DB nếu không bị loại
-  db.get('orders')
-    .push({
-      id,
-      user_id: chatId,
-      note,
-      last_code: lastCode,
-      nextCheck: Date.now() + (
-        lastCode === 'F001' ? 24 * 60 * 60 * 1000 :
-        lastCode === 'F600' ? 5 * 60 * 1000 :
-        60 * 60 * 1000
-      )
-    })
-    .write();
+//   // ✅ Thêm vào DB nếu không bị loại
+//   db.get('orders')
+//     .push({
+//       id,
+//       user_id: chatId,
+//       note,
+//       last_code: lastCode,
+//       nextCheck: Date.now() + (
+//         lastCode === 'F001' ? 24 * 60 * 60 * 1000 :
+//         lastCode === 'F600' ? 5 * 60 * 1000 :
+//         60 * 60 * 1000
+//       )
+//     })
+//     .write();
 
-  bot.sendMessage(chatId, `✅ Đã thêm mã vận đơn: ${id} vào danh sách theo dõi.`);
-});
+//   bot.sendMessage(chatId, `✅ Đã thêm mã vận đơn: ${id} vào danh sách theo dõi.`);
+// });
 
-bot.onText(/\/l/, (msg) => {
-  const chatId = msg.chat.id;
+// bot.onText(/\/l/, (msg) => {
+//   const chatId = msg.chat.id;
 
-  const orders = db.get('orders')
-    .filter({ user_id: chatId })
-    .value();
+//   const orders = db.get('orders')
+//     .filter({ user_id: chatId })
+//     .value();
 
-  if (orders.length === 0) {
-    return bot.sendMessage(chatId, '📭 Bạn chưa theo dõi mã vận đơn nào.');
-  }
+//   if (orders.length === 0) {
+//     return bot.sendMessage(chatId, '📭 Bạn chưa theo dõi mã vận đơn nào.');
+//   }
 
-  const list = orders.map((o, i) => 
-    `${i + 1}. ${o.id}${o.note ? ` 📝 ${o.note}` : ''}`
-  ).join('\n');
+//   const list = orders.map((o, i) => 
+//     `${i + 1}. ${o.id}${o.note ? ` 📝 ${o.note}` : ''}`
+//   ).join('\n');
 
-  bot.sendMessage(chatId, `📋 Danh sách mã bạn đang theo dõi:\n\n${list}`);
-});
+//   bot.sendMessage(chatId, `📋 Danh sách mã bạn đang theo dõi:\n\n${list}`);
+// });
 
-bot.onText(/\/x (.+)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const idToDelete = match[1].trim();
+// bot.onText(/\/x (.+)/, (msg, match) => {
+//   const chatId = msg.chat.id;
+//   const idToDelete = match[1].trim();
 
-  const exists = db.get('orders')
-    .find({ id: idToDelete, user_id: chatId })
-    .value();
+//   const exists = db.get('orders')
+//     .find({ id: idToDelete, user_id: chatId })
+//     .value();
 
-  if (!exists) {
-    return bot.sendMessage(chatId, `⚠️ Không tìm thấy mã ${idToDelete} trong danh sách của bạn.`);
-  }
+//   if (!exists) {
+//     return bot.sendMessage(chatId, `⚠️ Không tìm thấy mã ${idToDelete} trong danh sách của bạn.`);
+//   }
 
-  db.get('orders')
-    .remove({ id: idToDelete, user_id: chatId })
-    .write();
+//   db.get('orders')
+//     .remove({ id: idToDelete, user_id: chatId })
+//     .write();
 
-  bot.sendMessage(chatId, `🗑️ Đã xóa mã vận đơn ${idToDelete} khỏi danh sách theo dõi.`);
-});
+//   bot.sendMessage(chatId, `🗑️ Đã xóa mã vận đơn ${idToDelete} khỏi danh sách theo dõi.`);
+// });
 
 
 // Lệnh /start
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
+// bot.onText(/\/start/, (msg) => {
+//   const chatId = msg.chat.id;
 
-  const welcomeMsg = `
-👋 Xin chào ${msg.from.first_name || 'bạn'}!
+//   const welcomeMsg = `
+// 👋 Xin chào ${msg.from.first_name || 'bạn'}!
 
-🤖 Tôi là bot theo dõi đơn hàng giao vận.
+// 🤖 Tôi là bot theo dõi đơn hàng giao vận.
 
-Bạn có thể chọn một hành động dưới đây 👇 hoặc dùng lệnh thủ công:
-- /d SPXVNxxxxx Ghi chú
-- /l
-- /x SPXVNxxxxx
-  `;
+// Bạn có thể chọn một hành động dưới đây 👇 hoặc dùng lệnh thủ công:
+// - /d SPXVNxxxxx Ghi chú
+// - /l
+// - /x SPXVNxxxxx
+//   `;
 
-  // bot.sendMessage(chatId, welcomeMsg, {
-  //   reply_markup: {
-  //     keyboard: [
-  //       ['➕ Thêm mã đơn hàng'],
-  //       ['📋 Danh sách mã đang theo dõi'],
-  //       ['🗑️ Xóa mã đơn hàng']
-  //     ],
-  //     resize_keyboard: true,
-  //     one_time_keyboard: false
-  //   }
-  // });
-});
+//   // bot.sendMessage(chatId, welcomeMsg, {
+//   //   reply_markup: {
+//   //     keyboard: [
+//   //       ['➕ Thêm mã đơn hàng'],
+//   //       ['📋 Danh sách mã đang theo dõi'],
+//   //       ['🗑️ Xóa mã đơn hàng']
+//   //     ],
+//   //     resize_keyboard: true,
+//   //     one_time_keyboard: false
+//   //   }
+//   // });
+// });
 // 📦 Hàm lấy trạng thái đơn
-async function getLatestTrackingInfo(orderId) {
-  try {
-    const res = await axios.get(`https://spx-tracking.onrender.com/api/tracking?spx_tn=${orderId}`);
-    const records = res.data?.data?.sls_tracking_info?.records;
-    if (!records || !records.length) return null;
+// async function getLatestTrackingInfo(orderId) {
+//   try {
+//     const res = await axios.get(`https://spx-tracking.onrender.com/api/tracking?spx_tn=${orderId}`);
+//     const records = res.data?.data?.sls_tracking_info?.records;
+//     if (!records || !records.length) return null;
 
-    const latest = records.sort((a, b) => b.actual_time - a.actual_time)[0];
-    return {
-      code: latest.tracking_code,
-      description: latest.description,
-      timestamp: latest.actual_time
-    };
-  } catch (e) {
-    console.error(`❌ Lỗi API đơn ${orderId}:`, e.message);
-    return null;
-  }
-}
+//     const latest = records.sort((a, b) => b.actual_time - a.actual_time)[0];
+//     return {
+//       code: latest.tracking_code,
+//       description: latest.description,
+//       timestamp: latest.actual_time
+//     };
+//   } catch (e) {
+//     console.error(`❌ Lỗi API đơn ${orderId}:`, e.message);
+//     return null;
+//   }
+// }
 // ✅ Kiểm tra đơn
-async function checkOrder(order) {
-  const info = await getLatestTrackingInfo(order.id);
-  if (!info) return null;
+// async function checkOrder(order) {
+//   const info = await getLatestTrackingInfo(order.id);
+//   if (!info) return null;
 
-  const { code, description } = info;
-  const noteText = order.note ? `📝 ${order.note}\n` : '';
+//   const { code, description } = info;
+//   const noteText = order.note ? `📝 ${order.note}\n` : '';
 
-  const userId = order.user_id;
+//   const userId = order.user_id;
 
-  switch (code) {
-    case 'F980':
-      bot.sendMessage(userId, `✅ Đơn hàng ${order.id} đã giao thành công!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
-      db.get('orders').remove({ id: order.id, user_id: userId }).write();
-      break;
+//   switch (code) {
+//     case 'F980':
+//       bot.sendMessage(userId, `✅ Đơn hàng ${order.id} đã giao thành công!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
+//       db.get('orders').remove({ id: order.id, user_id: userId }).write();
+//       break;
 
-    case 'F585':
-    case 'F950':
-      bot.sendMessage(userId, `❌ Đơn hàng ${order.id} đã bị hủy!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
-      db.get('orders').remove({ id: order.id, user_id: userId }).write();
-      break;
+//     case 'F585':
+//     case 'F950':
+//       bot.sendMessage(userId, `❌ Đơn hàng ${order.id} đã bị hủy!\n${noteText}📄 ${description}\n🗑️ Đã xóa khỏi danh sách.`);
+//       db.get('orders').remove({ id: order.id, user_id: userId }).write();
+//       break;
 
-    case 'F001':
-      // Thông báo nếu chưa báo hoặc có thay đổi
-      if (order.last_code !== 'F001') {
-        bot.sendMessage(userId, `⚠️ Không lấy được hàng cho đơn ${order.id}!\n${noteText}📄 ${description}`);
-      }
-      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F001' }).write();
-      return 24 * 60 * 60 * 1000; // 24 giờ
+//     case 'F001':
+//       // Thông báo nếu chưa báo hoặc có thay đổi
+//       if (order.last_code !== 'F001') {
+//         bot.sendMessage(userId, `⚠️ Không lấy được hàng cho đơn ${order.id}!\n${noteText}📄 ${description}`);
+//       }
+//       db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F001' }).write();
+//       return 24 * 60 * 60 * 1000; // 24 giờ
 
 
-    case 'F600':
-      // Chỉ thông báo nếu code thay đổi hoặc chưa từng thông báo
-      if (order.last_code !== 'F600') {
-        bot.sendMessage(userId, `🚚 Đơn hàng ${order.id} đang được giao:\n${noteText}📄 ${description}`);
-      }
-      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F600' }).write();
-      return 5 * 60 * 1000;
+//     case 'F600':
+//       // Chỉ thông báo nếu code thay đổi hoặc chưa từng thông báo
+//       if (order.last_code !== 'F600') {
+//         bot.sendMessage(userId, `🚚 Đơn hàng ${order.id} đang được giao:\n${noteText}📄 ${description}`);
+//       }
+//       db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: 'F600' }).write();
+//       return 5 * 60 * 1000;
 
-    default:
-      db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: code }).write();
-      return 60 * 60 * 1000;
-  }
+//     default:
+//       db.get('orders').find({ id: order.id, user_id: userId }).assign({ last_code: code }).write();
+//       return 60 * 60 * 1000;
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
 // 🔁 Lập lịch kiểm tra
-function scheduleChecks() {
-  setInterval(async () => {
-    const now = Date.now();
-    const orders = db.get('orders').value();
+// function scheduleChecks() {
+//   setInterval(async () => {
+//     const now = Date.now();
+//     const orders = db.get('orders').value();
 
-    for (const order of orders) {
-      if (order.nextCheck && order.nextCheck > now + 500) continue;
+//     for (const order of orders) {
+//       if (order.nextCheck && order.nextCheck > now + 500) continue;
 
-      const delay = await checkOrder(order);
-      if (delay) {
-        db.get('orders').find({ id: order.id, user_id: order.user_id }).assign({ nextCheck: now + delay }).write();
-      }
-    }
-  }, 60 * 1000); // Kiểm tra mỗi phút
-}
+//       const delay = await checkOrder(order);
+//       if (delay) {
+//         db.get('orders').find({ id: order.id, user_id: order.user_id }).assign({ nextCheck: now + delay }).write();
+//       }
+//     }
+//   }, 60 * 1000); // Kiểm tra mỗi phút
+// }
 
-scheduleChecks();
+// scheduleChecks();
 
 // ===========================
 // 🌐 API thêm đơn qua Web
 // ===========================
-app.post('/api/add-tracking', (req, res) => {
-  const { id, user_id, note = '' } = req.body;
+// app.post('/api/add-tracking', (req, res) => {
+//   const { id, user_id, note = '' } = req.body;
 
-if (!/^SPXVN.+$/i.test(id)) {
-return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
-}
+// if (!/^SPXVN.+$/i.test(id)) {
+// return bot.sendMessage(chatId, '❌ Mã vận đơn phải bắt đầu bằng SPXVN.');
+// }
 
-  if (!user_id) {
-    return res.status(400).json({ error: 'Thiếu user_id (Telegram chat_id)' });
-  }
+//   if (!user_id) {
+//     return res.status(400).json({ error: 'Thiếu user_id (Telegram chat_id)' });
+//   }
 
-  const exists = db.get('orders')
-    .find({ id, user_id })
-    .value();
+//   const exists = db.get('orders')
+//     .find({ id, user_id })
+//     .value();
 
-  if (exists) {
-    return res.status(409).json({ error: '⚠️ Mã vận đơn đã tồn tại cho user này.' });
-  }
+//   if (exists) {
+//     return res.status(409).json({ error: '⚠️ Mã vận đơn đã tồn tại cho user này.' });
+//   }
 
-   db.get('orders')
-    .push({ id, user_id, status: 'dang_giao', note })
-    .write();
+//    db.get('orders')
+//     .push({ id, user_id, status: 'dang_giao', note })
+//     .write();
 
-  res.json({
-    message: '✅ Đã thêm mã vận đơn thành công',
-    id,
-    user_id,
-    note
-  });
-});
+//   res.json({
+//     message: '✅ Đã thêm mã vận đơn thành công',
+//     id,
+//     user_id,
+//     note
+//   });
+// });
 
+app.get('/uptime', (req, res) => {
+    res.json({ "status": "ok" })
+})
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {
