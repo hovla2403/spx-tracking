@@ -53,7 +53,7 @@ app.post('/api/find-number', async (req, res) => {
                   if (!phoneData || !phoneData.Result) {
                         return res.status(400).json({
                               success: false,
-                              message: 'Không tìm thấy số điện thoại từ API chaycodeso3.',
+                              message: 'Không tìm thấy số điện thoại từ API.',
                         });
                   }
 
