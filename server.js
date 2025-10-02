@@ -187,78 +187,86 @@ app.post('/api/find-number-only', async (req, res) => {
   });
 });
 
-app.post('/api/find-number-only', async (req, res) => {
-  const { phoneNumber } = req.body;
+app.post('/api/find-number-option2', async (req, res) => {
+ const { carrier, prefix, phoneNumber } = req.body;
 
- // Split the input into 9-digit chunks
-  const numbersToCheck = [];
-  const phoneNumberStr = phoneNumber.toString().replace(/\D/g, ''); // Remove non-digits (just to be safe)
+      const tryFindNumber = async () => {
+            let phoneData = null;
+            try {
+                  // Construct the API URL for option2 with different API key and parameters
+                  // Using chaycodeso3.com API for option2
+                  let apiUrl = 'https://ironsim.com/api/phone/new-session?token=2q7gezke8644i9ebh6ns5uyj0kfwaex8&service=422';
+                  if (prefix) {
+                        apiUrl += `&network=${carrier}&prefix=${prefix}`;
+                  } else if (phoneNumber) {
+                        apiUrl += `&network=${carrier}&number=${phoneNumber}`;
+                  } else {
+                        apiUrl += `&network=${carrier}`;
+                  }
+                  
+                  // Call API to get phone number
+                  const apiResponse = await axios.get(apiUrl);
+                  phoneData = apiResponse.data;
+                  
+                  // Check if phone number was returned
+                  if (!phoneData || !phoneData.data) {
+                        return res.status(400).json({
+                              success: false,
+                              message: 'Không tìm thấy số điện thoại từ API.',
+                        });
+                  }
 
-  // If the input is exactly 9 digits, add it directly
-  if (phoneNumberStr.length === 9) {
-    numbersToCheck.push(phoneNumberStr);
-  } else if (phoneNumberStr.length > 9) {
-    // Split into 9-digit chunks
-    for (let i = 0; i < phoneNumberStr.length; i += 9) {
-      const chunk = phoneNumberStr.slice(i, i + 9);
-      // Only add chunks that are exactly 9 digits (ignore leftovers)
-      if (chunk.length === 9) {
-        numbersToCheck.push(chunk);
-      }
-    }
-  } else {
-    return res.status(400).json({
-      success: false,
-      message: 'Số điện thoại phải có ít nhất 9 chữ số.',
-    });
-  }
+                  // Prepare Shopee API payload with phone number
+                  const shopeePayload = {
+                        phone: `${phoneData.data.phone_number}`,
+                        scenario: 3,
+                  };
 
-  if (numbersToCheck.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: 'Không có số điện thoại hợp lệ để kiểm tra.',
-    });
-  }
+                  // Call Shopee API
+                  const shopeeResponse = await axios.post(shopeeUrl, shopeePayload, { headers });
+                  
+                  // Check if the phone number exists in Shopee
+                  if (shopeeResponse.data.data.exist === true) {
+                        // Mark the phone number as expired
+                        let expiredUrl = `https://ironsim.com/api/session/cancel?token=2q7gezke8644i9ebh6ns5uyj0kfwaex8&session=${phoneData.data.session}`;
+                        await axios.get(expiredUrl);
 
-  const results = [];
-  // Check each 9-digit number
-  for (const number of numbersToCheck) {
-    try {
-      const shopeePayload = {
-        phone: `84${number}`, // Add country code
-        scenario: 3,
+                        // Retry the process by calling tryFindNumber again
+                        if (!phoneNumber) {
+                              return await tryFindNumber();
+                        } else {
+                              return res.status(500).json({
+                                    success: false,
+                                    message: 'Phone exist!',
+                                    error: error.message,
+                              });
+                        }
+                  } else {
+                        // If the phone number does not exist, return success
+                        return res.status(200).json({
+                              success: true,
+                              message: 'Tìm kiếm thành công!',
+                              data: {
+                                    phone: phoneData.data.phone_number,
+                              },
+                        });
+                  }
+            } catch (error) {
+                  console.error('Error processing request:', error.message);
+                  if (phoneData && phoneData.data) {
+                        let expiredUrl = `https://ironsim.com/api/session/cancel?token=2q7gezke8644i9ebh6ns5uyj0kfwaex8&session=${phoneData.data.session}`;
+                        await axios.get(expiredUrl);
+                  }
+                  return res.status(500).json({
+                        success: false,
+                        message: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
+                        error: error.message,
+                  });
+            }
       };
 
-      const shopeeResponse = await axios.post(shopeeUrl, shopeePayload, { headers });
-
-      if (shopeeResponse.data.data && typeof shopeeResponse.data.data.exist === 'boolean') {
-        results.push({
-          phone: number,
-          exists: shopeeResponse.data.data.exist,
-          message: shopeeResponse.data.data.exist ? 'Số này đã tồn tại trên Shopee.' : 'Số này chưa tồn tại trên Shopee.',
-        });
-      } else {
-        results.push({
-          phone: number,
-          exists: null,
-          message: 'Không thể kiểm tra số này. Phản hồi từ Shopee không hợp lệ.',
-        });
-      }
-    } catch (error) {
-      console.error(`Error checking number ${number}:`, error.message);
-      results.push({
-        phone: number,
-        exists: null,
-        message: 'Đã có lỗi xảy ra khi kiểm tra số này.',
-      });
-    }
-  }
-  // Return the results
-  return res.status(200).json({
-    success: true,
-    message: 'Kiểm tra số điện thoại hoàn tất.',
-    data: results,
-  });
+      // Start the process
+      await tryFindNumber();
 });
 
 // Serve the main HTML file

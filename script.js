@@ -135,6 +135,22 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('find-number-search').click();
     });
 
+    // Handle "Tùy chọn 2" to open findNumberModalOption2
+    document.getElementById('option2').addEventListener('click', function (e) {
+        e.preventDefault();
+        findOptions.style.display = 'none'; // Hide dropdown
+        const findNumberModalOption2 = new bootstrap.Modal(document.getElementById('findNumberModalOption2'));
+        findNumberModalOption2.show();
+        document.getElementById('find-number-search-option2').click();
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!findNumberButton.contains(e.target) && !findOptions.contains(e.target)) {
+            findOptions.style.display = 'none';
+        }
+    });
+
     function searchTracking() {
         const trackingNumber = trackingNumberInput.value.trim();
 
@@ -523,5 +539,105 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('find-number-result-only').style.display = 'none';
         document.getElementById('find-number-result-loader').style.display = 'none';
 
+    });
+
+    // Add event listener for option2 search
+    document.getElementById('find-number-search-option2').addEventListener('click', async () => {
+        const carrier = document.getElementById('carrier-option2').value;
+        const prefix = document.getElementById('prefix-option2').value;
+        const phoneNumber = document.getElementById('phone-number-option2').value;
+        const resultDiv = document.getElementById('find-number-result-option2');
+        const loader = document.getElementById('find-number-loader-option2');
+
+        // Validation: only carrier is required
+        if (!carrier) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Vui lòng chọn nhà mạng.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        // Validate numeric input if fields are not empty
+        if (prefix && !/^\d+$/.test(prefix)) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Đầu số chỉ được chứa số.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+        if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Số điện thoại chỉ được chứa số.';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        // Show loader
+        loader.style.display = 'block';
+        resultDiv.style.display = 'none';
+
+        try {
+            // Call the new API endpoint for option2
+            const response = await fetch('/api/find-number-option2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ carrier, prefix, phoneNumber }),
+            });
+
+            const data = await response.json();
+
+            // Hide loader
+            loader.style.display = 'none';
+
+            if (data.success) {
+                resultDiv.className = 'alert alert-success';
+                resultDiv.innerHTML = `
+                    Phone: <span id="phone-number-result-option2">${data.data.phone}</span>
+                    <button class="btn btn-primary btn-sm copy-button" id="copy-phone-button-option2">Copy</button>
+                `;
+                resultDiv.style.display = 'block';
+
+                // Add event listener for copy button
+                document.getElementById('copy-phone-button-option2').addEventListener('click', () => {
+                    const phoneNumber = document.getElementById('phone-number-result-option2').textContent;
+                    navigator.clipboard.writeText(phoneNumber)
+                        .then(() => {
+                            const button = document.getElementById('copy-phone-button-option2');
+                            button.textContent = 'Đã copy!';
+                            setTimeout(() => {
+                                button.textContent = 'Copy';
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy:', err);
+                            resultDiv.className = 'alert alert-danger';
+                            resultDiv.textContent = 'Không thể sao chép số điện thoại.';
+                            resultDiv.style.display = 'block';
+                        });
+                });
+            } else {
+                resultDiv.className = 'alert alert-danger';
+                resultDiv.textContent = data.message || 'Tìm kiếm thất bại.';
+                resultDiv.style.display = 'block';
+            }
+        } catch (error) {
+            // Hide loader
+            loader.style.display = 'none';
+
+            // Display error
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.textContent = 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+            resultDiv.style.display = 'block';
+        }
+    });
+
+    // Clear result when modal is closed
+    document.getElementById('findNumberModalOption2').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('carrier-option2').value = '1';
+        document.getElementById('prefix-option2').value = '';
+        document.getElementById('phone-number-option2').value = '';
+        document.getElementById('find-number-result-option2').style.display = 'none';
+        document.getElementById('find-number-loader-option2').style.display = 'none';
     });
 });
