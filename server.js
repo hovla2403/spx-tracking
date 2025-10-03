@@ -218,7 +218,7 @@ app.post('/api/find-number-option2', async (req, res) => {
 
                   // Prepare Shopee API payload with phone number
                   const shopeePayload = {
-                        phone: `${phoneData.data.phone_number}`,
+                        phone: `84${phoneData.data.phone_number}`,
                         scenario: 3,
                   };
 
