@@ -4,12 +4,10 @@ const puppeteer = require('puppeteer');
 let browser = null;
 let isInitializing = false;
 
-// Khởi tạo browser (singleton)
 async function getBrowser() {
   if (browser) return browser;
   
   if (isInitializing) {
-    // Đợi browser khởi tạo xong
     while (isInitializing) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -23,6 +21,8 @@ async function getBrowser() {
     
     browser = await puppeteer.launch({
       headless: 'new',
+      // Đặc biệt cho Docker container
+      executablePath: '/usr/bin/google-chrome-stable',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -31,10 +31,8 @@ async function getBrowser() {
         '--no-first-run',
         '--no-zygote',
         '--disable-gpu',
-        '--single-process' // Quan trọng cho Render free tier
-      ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || 
-                      puppeteer.executablePath()
+        '--single-process'
+      ]
     });
     
     console.log('✅ Browser started successfully');
@@ -48,7 +46,6 @@ async function getBrowser() {
   }
 }
 
-// Kiểm tra số điện thoại Shopee
 async function checkShopeePhone(phoneNumber) {
   let page = null;
   
@@ -56,7 +53,6 @@ async function checkShopeePhone(phoneNumber) {
     const browserInstance = await getBrowser();
     page = await browserInstance.newPage();
     
-    // Anti-detection
     await page.evaluateOnNewDocument(() => {
       Object.defineProperty(navigator, 'webdriver', { get: () => false });
       window.chrome = { runtime: {} };
@@ -64,13 +60,11 @@ async function checkShopeePhone(phoneNumber) {
     
     console.log(`📞 Checking phone: ${phoneNumber}`);
     
-    // Load Shopee
     await page.goto('https://shopee.vn/buyer/reset?scenario=7', {
       waitUntil: 'networkidle2',
       timeout: 30000
     });
     
-    // Execute API call trong context của Shopee
     const result = await page.evaluate(async (phone) => {
       try {
         const csrf = (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
@@ -102,7 +96,7 @@ async function checkShopeePhone(phoneNumber) {
       }
     }, phoneNumber);
     
-    console.log(`✅ Check completed for ${phoneNumber}:`, result);
+    console.log(`✅ Check completed for ${phoneNumber}`);
     
     return result;
     
@@ -117,7 +111,6 @@ async function checkShopeePhone(phoneNumber) {
   }
 }
 
-// Cleanup khi shutdown
 async function closeBrowser() {
   if (browser) {
     console.log('🛑 Closing browser...');
