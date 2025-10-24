@@ -31,6 +31,7 @@ app.get('/api/tracking', async (req, res) => {
   }
 });
 
+// ✅ API MỚI: Kiểm tra số điện thoại bằng Puppeteer
 app.post('/api/check-phone-puppeteer', async (req, res) => {
   const { phone } = req.body;
   
@@ -41,61 +42,37 @@ app.post('/api/check-phone-puppeteer', async (req, res) => {
     });
   }
   
-  // ✅ Retry logic
-  let lastError = null;
-  const maxRetries = 2;
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`📞 Attempt ${attempt}/${maxRetries} for ${phone}`);
-      
-      const result = await checkShopeePhone(phone);
-      
-      if (result.error) {
-        lastError = result.message;
-        if (attempt < maxRetries) {
-          console.log(`⚠️ Error, waiting 2s before retry...`);
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          continue;
-        }
-        
-        return res.status(500).json({
-          success: false,
-          message: 'Lỗi khi kiểm tra số điện thoại',
-          error: result.message
-        });
-      }
-      
-      const exists = result.data?.data?.exist || false;
-      
-      return res.json({
-        success: true,
-        data: {
-          phone: phone,
-          exists: exists,
-          message: exists ? 'Số điện thoại đã tồn tại trên Shopee' : 'Số điện thoại chưa đăng ký Shopee'
-        }
+  try {
+    const result = await checkShopeePhone(phone);
+    
+    if (result.error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lỗi khi kiểm tra số điện thoại',
+        error: result.message
       });
-      
-    } catch (error) {
-      lastError = error.message;
-      console.error(`❌ Attempt ${attempt} failed:`, error.message);
-      
-      if (attempt < maxRetries) {
-        console.log(`⚠️ Retrying in 2 seconds...`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
     }
+    
+    const exists = result.data?.data?.exist || false;
+    
+    return res.json({
+      success: true,
+      data: {
+        phone: phone,
+        exists: exists,
+        message: exists ? 'Số điện thoại đã tồn tại trên Shopee' : 'Số điện thoại chưa đăng ký Shopee'
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in check-phone-puppeteer:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Đã có lỗi xảy ra',
+      error: error.message
+    });
   }
-  
-  // All retries failed
-  return res.status(500).json({
-    success: false,
-    message: `Đã thử ${maxRetries} lần nhưng vẫn lỗi`,
-    error: lastError
-  });
 });
-
 
 // ✅ CẬP NHẬT: API find-number với Puppeteer
 app.post('/api/find-number', async (req, res) => {
