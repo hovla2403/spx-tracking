@@ -177,7 +177,7 @@
         .clear-input {
             position: absolute;
             right: 3px;
-            top: 50%;
+            top: 41%;
             transform: translateY(-50%);
             font-size: 36px;
             cursor: pointer;
@@ -248,6 +248,16 @@
             text-align: center;
             gap: 10px;
         }
+
+        #find-number-result-option2 {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
         #find-number-loader {
             display: none;
             margin: 15px auto;
@@ -262,6 +272,20 @@
         input[type="number"]#prefix::-webkit-outer-spin-button,
         input[type="number"]#phone-number::-webkit-inner-spin-button,
         input[type="number"]#phone-number::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"]#prefix-option2,
+        input[type="number"]#phone-number {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type="number"]#prefix-option2::-webkit-inner-spin-button,
+        input[type="number"]#prefix-option2::-webkit-outer-spin-button,
+        input[type="number"]#phone-number-option2::-webkit-inner-spin-button,
+        input[type="number"]#phone-number-option2::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
@@ -333,13 +357,14 @@
                     <button class="btn btn-info" type="button" id="paste-button">Dán</button>
                     <button class="btn btn-primary" type="button" id="search-button">Tìm kiếm</button>
                     <button class="btn btn-secondary" type="button" id="copy-url-button">Copy URL</button>
-                    <div class="dropdown position-relative">
+                    <!-- <div class="dropdown position-relative">
                         <button class="btn btn-success" type="button" id="find-number-button">Tìm số</button>
                         <div class="dropdown-menu" id="find-options" style="display: none;">
                             <a class="dropdown-item" href="#" id="option1">Tự động</a>
+                            <a class="dropdown-item" href="#" id="option2">Tự động 2</a>
                             <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalOption2">1 or nhiều</a>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <div id="error-message" class="error-message">Vui lòng nhập mã vận đơn hợp lệ.</div>
@@ -355,7 +380,7 @@
             <div id="tracking-timeline"></div>
         </div>
     </div>
-    <div class="modal fade" id="findNumberModal" tabindex="-1" aria-labelledby="findNumberModalLabel" aria-hidden="true">
+    <!-- <div class="modal fade" id="findNumberModal" tabindex="-1" aria-labelledby="findNumberModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -366,19 +391,19 @@
                     <div class="mb-3">
                         <label for="carrier" class="form-label">Nhà mạng</label>
                         <select class="form-select" id="carrier">
+                            <option value="mobifone">Mobifone</option>
                             <option value="vietnamobile">Vietnamobile</option>
                             <option value="viettel">Viettel</option>
-                            <option value="mobifone">Mobifone</option>
                             <option value="vinaphone">Vinaphone</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="prefix" class="form-label">Đầu số</label>
-                        <input type="number" class="form-control" id="prefix" placeholder="VD: 098" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                        <input type="number" class="form-control" id="prefix"  pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
                     </div>
                     <div class="mb-3">
                         <label for="phone-number" class="form-label">Số điện thoại</label>
-                        <input type="number" class="form-control" id="phone-number" placeholder="VD: 123456789" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                        <input type="number" class="form-control" id="phone-number" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
                     </div>
                     <div id="find-number-result" class="alert"></div>
                     <div id="find-number-loader" class="loader"></div>
@@ -389,9 +414,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- Modal for Option 2 -->
-<div class="modal fade" id="modalOption2" tabindex="-1" aria-labelledby="modalOption2Label" aria-hidden="true">
+<!-- <div class="modal fade" id="modalOption2" tabindex="-1" aria-labelledby="modalOption2Label" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -401,7 +426,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="phone-number-only" class="form-label">Số điện thoại</label>
-                    <textarea class="form-control" id="phone-number-only" rows="4" placeholder="VD: 123456789 OR 77671191777670041477670066177670080777671366977671369077654775777671122777671485377671412683265713591265624583388156677671334377671" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"></textarea>
+                    <textarea class="form-control" id="phone-number-only" rows="4" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"></textarea>
                 </div>
                 <div id="find-number-result-only" class="alert" style="display: none;"></div>
                 <div id="find-number-loader-only" class="loader" style="display: none;"></div>
@@ -414,7 +439,44 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
+    <!-- Modal for Option 2 Auto -->
+    <!-- <div class="modal fade" id="findNumberModalOption2" tabindex="-1" aria-labelledby="findNumberModalOption2Label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="findNumberModalOption2Label">Tìm số điện thoại - Tự động 2</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="carrier-option2" class="form-label">Nhà mạng</label>
+                        <select class="form-select" id="carrier-option2">
+                            <option value="1">Mobifone</option>
+                            <option value="4">Vietnamobile</option>
+                            <option value="3">Viettel</option>
+                            <option value="2">Vinaphone</option>
+                            <option value="6">ITelecom</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prefix-option2" class="form-label">Đầu số</label>
+                        <input type="number" class="form-control" id="prefix-option2" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone-number-option2" class="form-label">Số điện thoại</label>
+                        <input type="number" class="form-control" id="phone-number-option2" pattern="[0-9]*" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+                    </div>
+                    <div id="find-number-result-option2" class="alert"></div>
+                    <div id="find-number-loader-option2" class="loader"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="find-number-search-option2">Tìm kiếm</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/script.js"></script>
 </body>
